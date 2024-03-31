@@ -3,6 +3,7 @@ import {handleError} from "../../config/errors/handler.error.js";
 import {LoginUserDto} from "../dtos/login-user.dto.js";
 import {CustomError} from "../../config/errors/custom.error.js";
 import {CreateUserDto} from "../dtos/create-user.dto.js";
+import {UpdateUserDto} from "../dtos/update-user.dto.js";
 
 export class UsersController {
 
@@ -63,7 +64,15 @@ export class UsersController {
   updateUserById = (req, res) => {
     const { userId } = req.params;
 
-    res.json({ message: `Este método actualiza un usuario por su id ${userId}` })
+    const [error, updateUserDto] = UpdateUserDto.create({ id: userId, body: req.body });
+
+    if(error)
+      return handleError(CustomError.badRequest(error), res);
+
+    this.userService.updateUserById({ userId, updateUserDto })
+      .then(user => res.json(user))
+      .catch(error => handleError(error, res));
+
   }
 
   updateStatusUserById = (req, res) => {
@@ -81,7 +90,15 @@ export class UsersController {
   deleteUserById = (req, res) => {
     const { userId } = req.params;
 
-    res.json({ message: `Este método elimina un usuario por su id ${userId}` })
+    if(isNaN(+userId))
+      return handleError(CustomError.badRequest('El id no es válido'), res);
+
+    if(Number(userId) === Number(req.body.user.id))
+      return handleError(CustomError.badRequest('No puedes eliminarte a ti mismo'), res);
+
+    this.userService.deleteUserById({ userId })
+      .then(userDeleted => res.json(userDeleted))
+      .catch(error => handleError(error, res));
   }
 
 }

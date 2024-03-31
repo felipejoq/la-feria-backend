@@ -1,12 +1,12 @@
 import {
   CREATE_USER,
+  DELETE_USER_BY_ID,
   GET_USER_BY_EMAIL_WITH_ROLES,
   GET_USER_BY_ID_WITH_ROLES,
-  GET_USERS_AND_ROLES_PAGINATE
+  GET_USERS_AND_ROLES_PAGINATE,
+  UPDATE_USER_BY_ID
 } from "../../database/queries/users.queries.js";
-import {
-  GET_TOTAL_USERS_FROM_CONFIG, IS_REGISTRATION_ACTIVE
-} from "../../database/queries/config.queries.js";
+import {GET_TOTAL_USERS_FROM_CONFIG, IS_REGISTRATION_ACTIVE} from "../../database/queries/config.queries.js";
 import {query} from "../../database/db.js";
 import {CustomError} from "../../config/errors/custom.error.js";
 import {Encoder} from "../../config/plugins/encoder.js";
@@ -48,6 +48,25 @@ export class UserService {
       throw CustomError.notFound('El usuario no existe o el email no es válido');
 
     return user;
+  }
+
+  async updateUserById({userId, updateUserDto}) {
+    const user = this.getUserById({userId});
+    if (!user) throw CustomError.notFound('El usuario no existe');
+
+    const {rows: [userUpdated]} = await query(UPDATE_USER_BY_ID, [updateUserDto.name, updateUserDto.email, updateUserDto.active, userId]);
+
+    return userUpdated;
+  }
+
+  async deleteUserById({userId}) {
+    console.log({userId})
+    const user = this.getUserById({userId});
+    if (!user) throw CustomError.notFound('El usuario no existe');
+
+    const {rows: [userDeleted]} = await query(DELETE_USER_BY_ID, [userId]);
+
+    return userDeleted;
   }
 
   async loginUser({loginDto}) {

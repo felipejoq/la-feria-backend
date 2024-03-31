@@ -20,10 +20,9 @@ export class AuthMiddleware {
     try {
 
       const payload = await JwtPlugin.validateToken({token});
-
       if (!payload) return res.status(401).json({error: 'El token no es válido'})
 
-      const user = await userService.getUserByEmail({userEmail: payload.email});
+      const user = await userService.getUserByEmail({email: payload.email});
       delete user.password
 
       if (!user) return res.status(401).json({error: 'El token no es válido'});
