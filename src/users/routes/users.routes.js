@@ -20,7 +20,7 @@ export class UsersRoutes {
     usersRouter.get('/', [validateJWT, validRoles([1])], usersController.getUsers);
     usersRouter.get('/:userId', usersController.getUserById);
     usersRouter.delete('/:userId', [validateJWT, validRoles([1])], usersController.deleteUserById);
-    usersRouter.put('/:userId', usersController.updateUserById);
+    usersRouter.put('/:userId',[validateJWT], usersController.updateUserById);
     usersRouter.post('/login', usersController.loginUser);
     usersRouter.post('/register', usersController.registerUser);
     usersRouter.put('/roles/:userId', [validateJWT, validRoles([1])], usersController.updateRolesUserById);

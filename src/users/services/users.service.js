@@ -13,6 +13,7 @@ import {CustomError} from "../../config/errors/custom.error.js";
 import {Encoder} from "../../config/plugins/encoder.js";
 import {JwtPlugin} from "../../config/plugins/jwt.js";
 import {User} from "../models/User.js";
+import {getResultsWithPagination} from "../../config/utils/results-with-pagination.js";
 
 export class UserService {
   constructor(rolesService) {
@@ -29,7 +30,13 @@ export class UserService {
     const users = usersResult?.rows;
     const total = parseInt(total_users);
 
-    return this.getResultsWithPagination({users, total, page, limit})
+    return getResultsWithPagination({
+      source: "users",
+      data: users,
+      total,
+      page,
+      limit
+    });
   }
 
   async getUserById({userId}) {
@@ -148,21 +155,6 @@ export class UserService {
     user.roles = rolesUser;
 
     return user;
-  }
-
-  getResultsWithPagination({users, total, page, limit}) {
-
-    const haveNext = (page * limit < total);
-    const havePrev = (page - 1 > 0) && (page + limit <= total);
-
-    return {
-      page,
-      limit,
-      total,
-      next: haveNext ? `/api/v1/user?page=${(page + 1)}&limit=${limit}` : null,
-      prev: havePrev ? `/api/v1/user?page=${(page - 1)}&limit=${limit}` : null,
-      users,
-    };
   }
 
 }
