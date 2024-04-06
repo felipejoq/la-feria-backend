@@ -78,7 +78,16 @@ export class UsersController {
   updateStatusUserById = (req, res) => {
     const { userId } = req.params;
 
-    res.json({ message: `Este método actualiza el estado de un usuario por si id ${userId}` })
+    if(isNaN(+userId))
+      return handleError(CustomError.badRequest('El id no es válido'), res);
+
+    if(Number(userId) === Number(req.body.user.id))
+      return handleError(CustomError.badRequest('No puedes desactivarte a ti mismo'), res);
+
+
+    this.userService.updateStatusUserById({ userId })
+      .then(user => res.json(user))
+      .catch(error => handleError(error, res));
   }
 
   updateRolesUserById = (req, res) => {
