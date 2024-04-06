@@ -35,7 +35,7 @@ export class RoleService {
     return await this.getRolById(idRole);
   }
 
-  async updatedRolesUser(userId, newRoles) {
+  async updatedRolesUser({userId, newRoles}) {
 
     await query(DELETE_USERS_ROLES_BY_USER_ID, [userId]);
 

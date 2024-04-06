@@ -4,6 +4,7 @@ import {LoginUserDto} from "../dtos/login-user.dto.js";
 import {CustomError} from "../../config/errors/custom.error.js";
 import {CreateUserDto} from "../dtos/create-user.dto.js";
 import {UpdateUserDto} from "../dtos/update-user.dto.js";
+import {UpdateRolesUserDto} from "../dtos/update-roles.dto.js";
 
 export class UsersController {
 
@@ -92,8 +93,17 @@ export class UsersController {
 
   updateRolesUserById = (req, res) => {
     const { userId } = req.params;
+    const { roles } = req.body;
+    const { user } = req.body;
 
-    res.json({ message: `Este método actualiza los roles de un usuario por si id ${userId}` })
+    const [error, updateRolesUserDto] = UpdateRolesUserDto.create({ userId, roles, user });
+
+    if(error)
+      return handleError(error, res);
+
+    this.userService.updateRolesUserById({ userId: updateRolesUserDto.userId, roles: updateRolesUserDto.roles })
+      .then(roles => res.json(roles))
+      .catch(error => handleError(error, res));
   }
 
   deleteUserById = (req, res) => {

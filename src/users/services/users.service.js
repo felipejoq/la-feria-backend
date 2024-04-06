@@ -3,7 +3,8 @@ import {
   DELETE_USER_BY_ID,
   GET_USER_BY_EMAIL_WITH_ROLES,
   GET_USER_BY_ID_WITH_ROLES,
-  GET_USERS_AND_ROLES_PAGINATE, UPDATE_STATUS_USER_BY_ID,
+  GET_USERS_AND_ROLES_PAGINATE,
+  UPDATE_STATUS_USER_BY_ID,
   UPDATE_USER_BY_ID
 } from "../../database/queries/users.queries.js";
 import {GET_TOTAL_USERS_FROM_CONFIG, IS_REGISTRATION_ACTIVE} from "../../database/queries/config.queries.js";
@@ -134,6 +135,19 @@ export class UserService {
     const {rows: [userUpdated]} = await query(UPDATE_STATUS_USER_BY_ID, [!user.active, user.id]);
 
     return userUpdated;
+  }
+
+  async updateRolesUserById({userId, roles}) {
+    const user = await this.getUserById({userId});
+    if (!user) throw CustomError.notFound('El usuario no existe');
+
+    await this.rolesService.checkAllowedRoles({roles});
+    const rolesUser = await this.rolesService.updatedRolesUser({userId, newRoles: roles});
+
+    delete user.password;
+    user.roles = rolesUser;
+
+    return user;
   }
 
   getResultsWithPagination({users, total, page, limit}) {
