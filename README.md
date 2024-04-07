@@ -30,7 +30,21 @@ git clone https://github.com/felipejoq/la-feria-backend.git
 cd la-feria-backend
 ```
 
-3. _IMPORTANTE:_ Crear un archivo ```.env``` tomando como ejemplo el archivo ```.env.template``` que se encuentra en la raíz del proyecto.
+3. _IMPORTANTE:_ Crear un archivo ```.env``` tomando como ejemplo el archivo ```.env.template``` que se encuentra en la 
+raíz del proyecto o tomar como ejemplo el siguiente:
+
+```env
+## Port for the server
+PORT=3000
+## Seed for JWT signature
+JWT_SEED=cualquiercosa
+## Config default for pg package -> https://github.com/brianc/node-postgres all required
+PGUSER=
+PGHOST=
+PGPASSWORD=
+PGDATABASE=
+PGPORT=
+```
 
 4. Instalar las dependencias:
 ```bash
