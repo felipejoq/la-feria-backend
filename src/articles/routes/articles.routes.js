@@ -1,4 +1,4 @@
-import { Router } from "express";
+import {Router} from "express";
 import {ArticlesController} from "../controllers/articles.controller.js";
 import {ArticlesService} from "../services/articles.service.js";
 import {AuthMiddleware} from "../../users/middlewares/auth.middleware.js";
@@ -14,12 +14,15 @@ export class ArticlesRoutes {
     const articlesService = new ArticlesService(imagesService);
     const articlesController = new ArticlesController(articlesService);
 
+    const {validateJWT} = AuthMiddleware;
+    const {validRolesArticles} = RoleMiddleware;
+
     articlesRouter.get('/', articlesController.getArticles);
     articlesRouter.get('/:articleValue', articlesController.getArticleById);
-    articlesRouter.get('/user/:userId', articlesController.getArticleByUserId);
-    articlesRouter.post('/', articlesController.createArticle);
-    articlesRouter.put('/:articleId',[AuthMiddleware.validateJWT, RoleMiddleware.validRolesArticles([1, 3])], articlesController.updateArticleById);
-    articlesRouter.delete('/:articleId', articlesController.deleteArticleById);
+    articlesRouter.get('/user/:userId', articlesController.getArticlesByUserId);
+    articlesRouter.post('/', [validateJWT, validRolesArticles([1, 2, 3])], articlesController.createArticle);
+    articlesRouter.put('/:articleId', [validateJWT, validRolesArticles([1, 2, 3])], articlesController.updateArticleById);
+    articlesRouter.delete('/:articleId', [validateJWT, validRolesArticles([1, 2, 3])], articlesController.deleteArticleById);
 
     return articlesRouter;
   }

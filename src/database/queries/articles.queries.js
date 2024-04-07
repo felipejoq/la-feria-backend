@@ -46,20 +46,21 @@ json_build_object(
   'email', u.email,
   'image', u.image
 ) AS author,
+json_build_object(
+  'id', c.id::integer,
+  'title', c.title
+) AS category,
 json_agg(json_build_object(
   'id', i.id::integer, 
   'url_img', 
   i.url_img)) AS article_images
 FROM articles a
-INNER JOIN users u
-ON a.user_id = u.id
-LEFT JOIN images_article i
-ON a.id = i.article_id
+INNER JOIN users u ON a.user_id = u.id
+LEFT JOIN images_article i ON a.id = i.article_id
+INNER JOIN categories c ON a.category_id = c.id
 WHERE a.active = true
-GROUP BY a.id, a.title, a.description, a.slug, a.price, a.active, a.created_at, a.updated_at, u.id, u.name, u.email, u.image
-ORDER BY a.id
-OFFSET $1
-LIMIT $2
+GROUP BY a.id, a.title, a.description, a.slug, a.price, a.active, a.created_at, a.updated_at, c.id, u.id, u.name, u.email, u.image
+ORDER BY a.id OFFSET $1 LIMIT $2
 `;
 
 export const GET_ALL_ARTICLES_WHIT_PAGINATION = `
@@ -104,6 +105,10 @@ a.active,
 a.created_at,
 a.updated_at,
 json_build_object(
+  'id', c.id::integer,
+  'title', c.title
+) AS category,
+json_build_object(
   'id', u.id::integer,
   'name', u.name,
   'email', u.email,
@@ -114,12 +119,11 @@ json_agg(json_build_object(
   'url_img', 
   i.url_img)) AS article_images
 FROM articles a
-INNER JOIN users u
-ON a.user_id = u.id
-LEFT JOIN images_article i
-ON a.id = i.article_id
+INNER JOIN users u ON a.user_id = u.id
+LEFT JOIN images_article i ON a.id = i.article_id
+INNER JOIN categories c ON a.category_id = c.id
 WHERE a.id = $1
-GROUP BY a.id, a.title, a.description, a.slug, a.price, a.active, a.created_at, a.updated_at, u.id, u.name, u.email, u.image
+GROUP BY a.id, a.title, a.description, a.slug, a.price, a.active, a.created_at, a.updated_at, u.id, u.name, u.email, u.image, c.id
 `;
 
 export const GET_ARTICLE_BY_SLUG = `
@@ -133,6 +137,10 @@ a.active,
 a.created_at,
 a.updated_at,
 json_build_object(
+  'id', c.id::integer,
+  'title', c.title
+) AS category,
+json_build_object(
   'id', u.id::integer,
   'name', u.name,
   'email', u.email,
@@ -143,26 +151,17 @@ json_agg(json_build_object(
   'url_img', 
   i.url_img)) AS article_images
 FROM articles a
-INNER JOIN users u
-ON a.user_id = u.id
-LEFT JOIN images_article i
-ON a.id = i.article_id
+INNER JOIN users u ON a.user_id = u.id
+LEFT JOIN images_article i ON a.id = i.article_id
+INNER JOIN categories c ON a.category_id = c.id
 WHERE a.active = true AND a.slug = $1
-GROUP BY a.id, a.title, a.description, a.slug, a.price, a.active, a.created_at, a.updated_at, u.id, u.name, u.email, u.image
-`;
-
-export const GET_TOTAL_ARTICLES = `
-SELECT COUNT(*) FROM articles;
-`;
-
-export const GET_ALL_IMAGES_BY_ARTICLE_ID = `
-SELECT * FROM images_article WHERE article_id = $1
+GROUP BY a.id, a.title, a.description, a.slug, a.price, a.active, a.created_at, a.updated_at, u.id, u.name, u.email, u.image, c.id
 `;
 
 export const CREATE_ARTICLE = `
-INSERT INTO articles ( title, description, slug, price, active, user_id)
-VALUES ($1, $2, $3, $4, $5, $6)
-RETURNING *, id::integer, user_id::integer
+INSERT INTO articles ( title, description, slug, price, isNew, user_id, category_id)
+VALUES ($1, $2, $3, $4, $5, $6, $7)
+RETURNING *, id::integer, user_id::integer, category_id::integer
 `;
 
 export const GET_IMAGE_BY_ID = `

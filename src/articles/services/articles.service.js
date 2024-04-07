@@ -2,13 +2,18 @@ import {
   GET_TOTAL_ARTICLES_FROM_CONFIG
 } from "../../database/queries/config.queries.js";
 import {
+  CREATE_ARTICLE,
   GET_ARTICLE_BY_ID,
-  GET_ARTICLE_BY_SLUG, GET_ARTICLES_BY_USER_ID,
-  GET_ARTICLES_WHIT_PAGINATION, UPDATE_ARTICLE_BY_ID
+  GET_ARTICLE_BY_SLUG,
+  DELETE_ARTICLE_BY_ID,
+  UPDATE_ARTICLE_BY_ID,
+  GET_ARTICLES_BY_USER_ID,
+  GET_ARTICLES_WHIT_PAGINATION,
 } from "../../database/queries/articles.queries.js";
 import {query} from "../../database/db.js";
 import {getResultsWithPagination} from "../../config/utils/results-with-pagination.js";
 import {CustomError} from "../../config/errors/custom.error.js";
+import {getUUID} from "../../config/plugins/uuid.js";
 
 export class ArticlesService {
 
@@ -63,18 +68,68 @@ export class ArticlesService {
 
   }
 
-  async updateArticleById({userId, articleId, updateArticleDto}) {
+  async createArticle({userId, createArticleDto}) {
+
+    const {title, description, isNew, price, category_id} = createArticleDto;
+
+    const slug = this.generateSlug({title});
+
+    const params = [title, description, slug, price, isNew, userId, category_id];
+
+    const {rows: [newArticle]} = await query(CREATE_ARTICLE, params);
+
+    return newArticle;
+  }
+
+  async updateArticleById({user, articleId, updateArticleDto}) {
     const article = await this.getArticleByIdOrSlug({value: articleId});
     const {author: {id}} = article;
+    const isAdmin = user.roles.some(role => role.id === 1);
 
-    if(!article)
-      throw CustomError.notFound('El artículo no existe');
-
-    if (userId !== id)
+    if (user.id !== id && !isAdmin)
       throw CustomError.forbidden('No tienes permisos para editar este artículo');
 
-    const {rows: [articleUpdated]} = await query(UPDATE_ARTICLE_BY_ID, [updateArticleDto.title, updateArticleDto.description, updateArticleDto.isNew, updateArticleDto.price, updateArticleDto.category_id, articleId]);
+    if (updateArticleDto.image_url) {
+      await Promise.all([
+        this.imagesServices.removeImagesByArticleId({articleId}),
+        this.imagesServices.addImageToArticle({urlImg: updateArticleDto.image_url, articleId})
+      ]);
+    }
 
-    return articleUpdated;
+    const params = [
+      updateArticleDto.title,
+      updateArticleDto.description,
+      updateArticleDto.isNew,
+      updateArticleDto.price,
+      updateArticleDto.category_id,
+      articleId
+    ];
+
+    await query(UPDATE_ARTICLE_BY_ID, params);
+
+    return await this.getArticleByIdOrSlug({value: articleId});
+  }
+
+  async deleteArticleById({user, articleId}) {
+    const article = await this.getArticleByIdOrSlug({value: articleId});
+    const {author: {id: idAuthor}} = article;
+    const isAdmin = user.roles.some(role => role.id === 1);
+
+    if (user.id !== idAuthor && !isAdmin)
+      throw CustomError.forbidden('No tienes permisos para eliminar este artículo');
+
+    const {rows: [articleDeleted]} = await query(DELETE_ARTICLE_BY_ID, [articleId]);
+    return articleDeleted;
+  }
+
+  generateSlug({title}) {
+    const cleanTitle = title
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^\w\s-]/g, "")
+      .replace(/\s+/g, "-");
+
+    return `${cleanTitle}-${getUUID()}`;
   }
 }
