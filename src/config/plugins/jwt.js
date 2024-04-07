@@ -9,7 +9,6 @@ export class JwtPlugin {
 
     return new Promise((resolve) => {
       jwt.sign(payload, JWT_SEED, {expiresIn: duration}, (err, token) => {
-        console.log(err)
         if (err)
           return resolve(null);
 
