@@ -3,7 +3,7 @@ import {
   DELETE_USERS_ROLES_BY_USER_ID, GET_ALL_ROLES_ID,
   GET_ROL_BY_ID,
   GET_ROLE_BY_ID,
-  SET_ROL_TO_USER, UPDATE_STATUS_USER_BY_ID
+  SET_ROL_TO_USER,
 } from "../../database/queries/users.queries.js";
 import {CustomError} from "../../config/errors/custom.error.js";
 
@@ -35,7 +35,7 @@ export class RoleService {
     return await this.getRolById(idRole);
   }
 
-  async updatedRolesUser(userId, newRoles) {
+  async updatedRolesUser({userId, newRoles}) {
 
     await query(DELETE_USERS_ROLES_BY_USER_ID, [userId]);
 

@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS articles (
     description TEXT NOT NULL,
     slug VARCHAR NOT NULL,
     price DECIMAL(10,2),
-    new BOOLEAN DEFAULT true NOT NULL,
+    isNew BOOLEAN DEFAULT true NOT NULL,
     active BOOLEAN DEFAULT true NOT NULL,
     created_at TIMESTAMP DEFAULT current_timestamp NOT NULL,
     updated_at TIMESTAMP DEFAULT current_timestamp NOT NULL,
@@ -100,7 +100,7 @@ VALUES
 
 INSERT INTO categories (title) VALUES ('general'), ('tecnología'), ('alimentos'), ('vestuario');
 
-INSERT INTO articles (title, description, slug, price, new, user_id, category_id, created_at, updated_at, active)
+INSERT INTO articles (title, description, slug, price, isNew, user_id, category_id, created_at, updated_at, active)
 VALUES (
   'Lindo vestido de verano',
   'Este vestido es perfecto para una salida con amigos, una cena romántica o incluso una boda. Es elegante y sofisticado, pero también lo suficientemente informal para usarlo en el día a día.',

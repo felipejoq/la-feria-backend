@@ -4,6 +4,7 @@ import {
   GET_USER_BY_EMAIL_WITH_ROLES,
   GET_USER_BY_ID_WITH_ROLES,
   GET_USERS_AND_ROLES_PAGINATE,
+  UPDATE_STATUS_USER_BY_ID,
   UPDATE_USER_BY_ID
 } from "../../database/queries/users.queries.js";
 import {GET_TOTAL_USERS_FROM_CONFIG, IS_REGISTRATION_ACTIVE} from "../../database/queries/config.queries.js";
@@ -12,6 +13,7 @@ import {CustomError} from "../../config/errors/custom.error.js";
 import {Encoder} from "../../config/plugins/encoder.js";
 import {JwtPlugin} from "../../config/plugins/jwt.js";
 import {User} from "../models/User.js";
+import {getResultsWithPagination} from "../../config/utils/results-with-pagination.js";
 
 export class UserService {
   constructor(rolesService) {
@@ -28,7 +30,13 @@ export class UserService {
     const users = usersResult?.rows;
     const total = parseInt(total_users);
 
-    return this.getResultsWithPagination({users, total, page, limit})
+    return getResultsWithPagination({
+      source: "users",
+      data: users,
+      total,
+      page,
+      limit
+    });
   }
 
   async getUserById({userId}) {
@@ -127,19 +135,26 @@ export class UserService {
     };
   }
 
-  getResultsWithPagination({users, total, page, limit}) {
+  async updateStatusUserById({userId}) {
+    const user = await this.getUserById({userId});
+    if (!user) throw CustomError.notFound('El usuario no existe');
 
-    const haveNext = (page * limit < total);
-    const havePrev = (page - 1 > 0) && (page + limit <= total);
+    const {rows: [userUpdated]} = await query(UPDATE_STATUS_USER_BY_ID, [!user.active, user.id]);
 
-    return {
-      page,
-      limit,
-      total,
-      next: haveNext ? `/api/v1/user?page=${(page + 1)}&limit=${limit}` : null,
-      prev: havePrev ? `/api/v1/user?page=${(page - 1)}&limit=${limit}` : null,
-      users,
-    };
+    return userUpdated;
+  }
+
+  async updateRolesUserById({userId, roles}) {
+    const user = await this.getUserById({userId});
+    if (!user) throw CustomError.notFound('El usuario no existe');
+
+    await this.rolesService.checkAllowedRoles({roles});
+    const rolesUser = await this.rolesService.updatedRolesUser({userId, newRoles: roles});
+
+    delete user.password;
+    user.roles = rolesUser;
+
+    return user;
   }
 
 }

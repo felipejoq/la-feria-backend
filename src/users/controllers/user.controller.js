@@ -4,6 +4,7 @@ import {LoginUserDto} from "../dtos/login-user.dto.js";
 import {CustomError} from "../../config/errors/custom.error.js";
 import {CreateUserDto} from "../dtos/create-user.dto.js";
 import {UpdateUserDto} from "../dtos/update-user.dto.js";
+import {UpdateRolesUserDto} from "../dtos/update-roles.dto.js";
 
 export class UsersController {
 
@@ -78,13 +79,31 @@ export class UsersController {
   updateStatusUserById = (req, res) => {
     const { userId } = req.params;
 
-    res.json({ message: `Este método actualiza el estado de un usuario por si id ${userId}` })
+    if(isNaN(+userId))
+      return handleError(CustomError.badRequest('El id no es válido'), res);
+
+    if(Number(userId) === Number(req.body.user.id))
+      return handleError(CustomError.badRequest('No puedes desactivarte a ti mismo'), res);
+
+
+    this.userService.updateStatusUserById({ userId })
+      .then(user => res.json(user))
+      .catch(error => handleError(error, res));
   }
 
   updateRolesUserById = (req, res) => {
     const { userId } = req.params;
+    const { roles } = req.body;
+    const { user } = req.body;
 
-    res.json({ message: `Este método actualiza los roles de un usuario por si id ${userId}` })
+    const [error, updateRolesUserDto] = UpdateRolesUserDto.create({ userId, roles, user });
+
+    if(error)
+      return handleError(error, res);
+
+    this.userService.updateRolesUserById({ userId: updateRolesUserDto.userId, roles: updateRolesUserDto.roles })
+      .then(roles => res.json(roles))
+      .catch(error => handleError(error, res));
   }
 
   deleteUserById = (req, res) => {
