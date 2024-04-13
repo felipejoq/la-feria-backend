@@ -99,6 +99,7 @@ SELECT
 a.id::integer,
 a.title,
 a.description,
+a.isNew,
 a.slug,
 a.price::float,
 a.active,
@@ -123,7 +124,7 @@ INNER JOIN users u ON a.user_id = u.id
 LEFT JOIN images_article i ON a.id = i.article_id
 INNER JOIN categories c ON a.category_id = c.id
 WHERE a.id = $1
-GROUP BY a.id, a.title, a.description, a.slug, a.price, a.active, a.created_at, a.updated_at, u.id, u.name, u.email, u.image, c.id
+GROUP BY a.id, a.title, a.description, a.slug, a.price, a.active, a.isNew, a.created_at, a.updated_at, u.id, u.name, u.email, u.image, c.id
 `;
 
 export const GET_ARTICLE_BY_SLUG = `
@@ -131,6 +132,7 @@ SELECT
 a.id::integer,
 a.title,
 a.description,
+a.isNew,
 a.slug,
 a.price::float,
 a.active,
@@ -155,7 +157,7 @@ INNER JOIN users u ON a.user_id = u.id
 LEFT JOIN images_article i ON a.id = i.article_id
 INNER JOIN categories c ON a.category_id = c.id
 WHERE a.active = true AND a.slug = $1
-GROUP BY a.id, a.title, a.description, a.slug, a.price, a.active, a.created_at, a.updated_at, u.id, u.name, u.email, u.image, c.id
+GROUP BY a.id, a.title, a.description, a.isNew, a.slug, a.price, a.active, a.created_at, a.updated_at, u.id, u.name, u.email, u.image, c.id
 `;
 
 export const CREATE_ARTICLE = `
