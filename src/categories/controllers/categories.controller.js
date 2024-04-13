@@ -1,5 +1,4 @@
 import {handleError} from "../../config/errors/handler.error.js";
-import {CategoriesService} from "../services/categories.service.js";
 
 export class CategoriesController {
 
