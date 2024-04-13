@@ -49,7 +49,7 @@ export class UserService {
   }
 
   async getUserByEmail({email}) {
-    const result = await query(GET_USER_BY_EMAIL_WITH_ROLES, [email]);
+    const result = await query(GET_USER_BY_EMAIL_WITH_ROLES, [email.toLowerCase()]);
     const user = result.rows[0];
 
     if (!user)
@@ -118,7 +118,7 @@ export class UserService {
 
     const newUser = new User(createUserDto);
     const {name, email, password, roles} = newUser;
-    const {rows: [user]} = await query(CREATE_USER, [name, email, password]);
+    const {rows: [user]} = await query(CREATE_USER, [name, email.toLowerCase(), password]);
     const rolesUser = await this.rolesService.setRoleUser({userId: user.id, idRole: roles[0]});
 
     delete user.password;
