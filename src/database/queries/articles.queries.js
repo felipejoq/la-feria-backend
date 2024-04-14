@@ -25,7 +25,7 @@ LEFT JOIN images_article i
 ON a.id = i.article_id
 WHERE u.id = $1
 GROUP BY a.id, a.title, a.description, a.slug, a.price, a.active, a.created_at, a.updated_at, u.id, u.name, u.email, u.image
-ORDER BY a.id
+ORDER BY a.created_at
 OFFSET $2
 LIMIT $3
 `;
@@ -60,7 +60,8 @@ LEFT JOIN images_article i ON a.id = i.article_id
 INNER JOIN categories c ON a.category_id = c.id
 WHERE a.active = true
 GROUP BY a.id, a.title, a.description, a.slug, a.price, a.active, a.created_at, a.updated_at, c.id, u.id, u.name, u.email, u.image
-ORDER BY a.id OFFSET $1 LIMIT $2
+ORDER BY a.created_at
+OFFSET $1 LIMIT $2
 `;
 
 export const GET_ALL_ARTICLES_WHIT_PAGINATION = `
