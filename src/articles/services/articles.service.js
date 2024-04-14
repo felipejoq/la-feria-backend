@@ -70,13 +70,20 @@ export class ArticlesService {
 
   async createArticle({userId, createArticleDto}) {
 
-    const {title, description, isNew, price, category_id} = createArticleDto;
+    const {title, description, isNew, price, category_id, image_url} = createArticleDto;
 
     const slug = this.generateSlug({title});
 
     const params = [title, description, slug, price, isNew, userId, category_id];
 
     const {rows: [newArticle]} = await query(CREATE_ARTICLE, params);
+
+    if(newArticle){
+      await this.imagesServices.addImageToArticle({
+        urlImg: image_url,
+        articleId: newArticle.id
+      });
+    }
 
     return newArticle;
   }
