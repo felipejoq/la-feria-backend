@@ -1,34 +1,33 @@
 export const GET_ARTICLES_BY_USER_ID = `
 SELECT
-  a.id::integer,
-  a.title,
-  a.description,
-  a.slug,
-  a.price::float,
-  a.active,
-  a.created_at,
-  a.updated_at,
-  json_build_object(
-    'id', u.id::integer,
-    'name', u.name,
-    'email', u.email,
-    'image', u.image
-  ) AS author,
-  json_build_object(
+a.id::integer,
+a.title,
+a.description,
+a.slug,
+a.price::float,
+a.active,
+a.created_at,
+a.updated_at,
+json_build_object(
+  'id', u.id::integer,
+  'name', u.name,
+  'email', u.email,
+  'image', u.image
+) AS author,
+json_build_object(
   'id', c.id::integer,
   'title', c.title
 ) AS category,
-  json_agg(json_build_object(
-    'id', i.id::integer, 
-    'url_img', 
-    i.url_img)) AS article_images
+json_agg(json_build_object(
+  'id', i.id::integer, 
+  'url_img', 
+  i.url_img)) AS article_images
 FROM articles a
-INNER JOIN users u
-ON a.user_id = u.id
-LEFT JOIN images_article i
-ON a.id = i.article_id
+INNER JOIN users u ON a.user_id = u.id
+LEFT JOIN images_article i ON a.id = i.article_id
+INNER JOIN categories c ON a.category_id = c.id
 WHERE u.id = $1
-GROUP BY a.id, a.title, a.description, a.slug, a.price, a.active, a.created_at, a.updated_at, u.id, u.name, u.email, u.image
+GROUP BY a.id, a.title, a.description, a.slug, a.price, a.active, a.created_at, c.id, a.updated_at, u.id, u.name, u.email, u.image
 ORDER BY a.created_at DESC
 OFFSET $2
 LIMIT $3
