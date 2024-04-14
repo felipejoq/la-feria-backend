@@ -14,6 +14,10 @@ SELECT
     'email', u.email,
     'image', u.image
   ) AS author,
+  json_build_object(
+  'id', c.id::integer,
+  'title', c.title
+) AS category,
   json_agg(json_build_object(
     'id', i.id::integer, 
     'url_img', 
