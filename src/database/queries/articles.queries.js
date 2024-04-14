@@ -25,7 +25,7 @@ LEFT JOIN images_article i
 ON a.id = i.article_id
 WHERE u.id = $1
 GROUP BY a.id, a.title, a.description, a.slug, a.price, a.active, a.created_at, a.updated_at, u.id, u.name, u.email, u.image
-ORDER BY a.created_at
+ORDER BY a.created_at DESC
 OFFSET $2
 LIMIT $3
 `;
@@ -60,7 +60,7 @@ LEFT JOIN images_article i ON a.id = i.article_id
 INNER JOIN categories c ON a.category_id = c.id
 WHERE a.active = true
 GROUP BY a.id, a.title, a.description, a.slug, a.price, a.active, a.created_at, a.updated_at, c.id, u.id, u.name, u.email, u.image
-ORDER BY a.created_at
+ORDER BY a.created_at DESC
 OFFSET $1 LIMIT $2
 `;
 
