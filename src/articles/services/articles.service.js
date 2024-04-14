@@ -8,7 +8,7 @@ import {
   DELETE_ARTICLE_BY_ID,
   UPDATE_ARTICLE_BY_ID,
   GET_ARTICLES_BY_USER_ID,
-  GET_ARTICLES_WHIT_PAGINATION,
+  GET_ARTICLES_WHIT_PAGINATION, SEARCH_ARTICLES,
 } from "../../database/queries/articles.queries.js";
 import {query} from "../../database/db.js";
 import {getResultsWithPagination} from "../../config/utils/results-with-pagination.js";
@@ -66,6 +66,20 @@ export class ArticlesService {
       limit
     });
 
+  }
+
+  async getArticlesByTerm({term, page, limit}) {
+    const articlesResult = await query(SEARCH_ARTICLES, [`%${term}%`, (page - 1) * limit, limit]);
+
+    const articles = articlesResult?.rows;
+
+    return getResultsWithPagination({
+      source: "articles",
+      data: articles,
+      total: articles.length,
+      page,
+      limit
+    });
   }
 
   async createArticle({userId, createArticleDto}) {

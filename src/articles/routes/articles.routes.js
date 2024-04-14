@@ -18,6 +18,7 @@ export class ArticlesRoutes {
     const {validRolesArticles} = RoleMiddleware;
 
     articlesRouter.get('/', articlesController.getArticles);
+    articlesRouter.get('/search', articlesController.getArticlesByTerm);
     articlesRouter.get('/:articleValue', articlesController.getArticleById);
     articlesRouter.get('/user/:userId', articlesController.getArticlesByUserId);
     articlesRouter.post('/', [validateJWT, validRolesArticles([1, 2, 3])], articlesController.createArticle);

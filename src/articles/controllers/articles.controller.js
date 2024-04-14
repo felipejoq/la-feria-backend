@@ -56,7 +56,24 @@ export class ArticlesController {
     if (error) return res.status(400).json({error});
 
     this.articlesService.getArticleByUserId({userId, page, limit})
-      .then(article => res.json(article))
+      .then(articles => res.json(articles))
+      .catch(error => handleError(error, res));
+  }
+
+  getArticlesByTerm = (req, res) => {
+    const {term, page = 1, limit = 10} = req.query;
+
+    if (!term)
+      return handleError(CustomError.badRequest('El término de búsqueda es requerido'), res);
+
+    const [error, pagination] = PaginationDto.create({
+      page: parseInt(page), limit: parseInt(limit)
+    });
+
+    if (error) return res.status(400).json({error});
+
+    this.articlesService.getArticlesByTerm({term, page, limit})
+      .then(articles => res.json(articles))
       .catch(error => handleError(error, res));
   }
 

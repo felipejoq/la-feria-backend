@@ -197,3 +197,38 @@ DELETE FROM images_article WHERE article_id = $1 AND id = $2 RETURNING *, id::in
 export const GET_ALL_IMAGES_ARTICLES = `
 SELECT *, id::integer, article_id::integer FROM images_article
 `;
+
+export const SEARCH_ARTICLES = `
+SELECT
+a.id::integer,
+a.title,
+a.description,
+a.isNew,
+a.slug,
+a.price::float,
+a.active,
+a.created_at,
+a.updated_at,
+json_build_object(
+  'id', u.id::integer,
+  'name', u.name,
+  'email', u.email,
+  'image', u.image
+) AS author,
+json_build_object(
+  'id', c.id::integer,
+  'title', c.title
+) AS category,
+json_agg(json_build_object(
+  'id', i.id::integer, 
+  'url_img', 
+  i.url_img)) AS article_images
+FROM articles a
+INNER JOIN users u ON a.user_id = u.id
+LEFT JOIN images_article i ON a.id = i.article_id
+INNER JOIN categories c ON a.category_id = c.id
+WHERE a.active = true AND (a.title ILIKE $1 OR a.description ILIKE $1)
+GROUP BY a.id, a.title, a.description, a.isNew, a.slug, a.price, a.active, a.created_at, a.updated_at, c.id, u.id, u.name, u.email, u.image
+ORDER BY a.created_at DESC
+OFFSET $2 LIMIT $3
+`;
