@@ -68,7 +68,7 @@ export class UserService {
   }
 
   async deleteUserById({userId}) {
-    const user = this.getUserById({userId});
+    await this.getUserById({userId});
 
     const {rows: [userDeleted]} = await query(DELETE_USER_BY_ID, [userId]);
 
