@@ -19,5 +19,4 @@ describe('should call server with arguments and start', () => {
     expect(Server.prototype.start).toHaveBeenCalledWith();
 
   });
-
 });

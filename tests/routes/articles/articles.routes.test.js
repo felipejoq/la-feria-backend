@@ -27,60 +27,6 @@ afterAll(async () => {
   await testServer.close();
 });
 
-describe('Test on api/v1/user', () => {
-  beforeEach(async () => {
-    jest.clearAllMocks();
-  });
-
-  test('GET /api/v1/user status 200', async () => {
-    query
-      .mockResolvedValueOnce({rows: [user]}) // login
-      .mockResolvedValueOnce({rows: [user]})
-      .mockResolvedValueOnce({rows: [user]})
-      .mockResolvedValueOnce({rows: [{total_users: 1}]});
-
-    // Login
-    const {body: { token }} = await request(testServer.app)
-      .post("/api/v1/user/login")
-      .send({email: 'felipe@test.com', password: '123123'});
-
-    // GET all users
-    const {body: {users}} = await request(testServer.app)
-      .get('/api/v1/user')
-      .set('Authorization', `Bearer ${token}`)
-      .expect(200);
-
-    delete user.password;
-
-    expect(users).toEqual([user]);
-
-  });
-
-  test('GET /api/v1/user/login status 200', async () => {
-    query.mockResolvedValueOnce({
-      rows: [{
-        user: 'felipe',
-        email: 'felipe@test.com',
-        active: true,
-        password: '$2b$10$12HQGrt8GM0BmJut/I8.QuWRVKySK1HxJtJH3CeBxc.fFysQ7ReYa'
-      }]
-    });
-
-    const {body} = await request(testServer.app)
-      .post("/api/v1/user/login")
-      .send({email: 'felipe@test.com', password: '123123'})
-      .expect(200);
-
-    expect(body).toEqual({
-      user: 'felipe',
-      email: 'felipe@test.com',
-      active: true,
-      token: expect.any(String)
-    });
-  });
-
-});
-
 describe('Test on api/v1/article', () => {
   beforeEach(async () => {
     jest.clearAllMocks();

@@ -68,9 +68,7 @@ export class UserService {
   }
 
   async deleteUserById({userId}) {
-    console.log({userId})
     const user = this.getUserById({userId});
-    if (!user) throw CustomError.notFound('El usuario no existe');
 
     const {rows: [userDeleted]} = await query(DELETE_USER_BY_ID, [userId]);
 
